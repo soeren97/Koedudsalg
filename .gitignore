@@ -1,0 +1,7 @@
+# Extensions
+*.pyc
+
+# Folders
+Reports/*
+Data/*
+Config/*
