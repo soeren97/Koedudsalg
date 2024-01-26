@@ -78,3 +78,45 @@ def seperate_data(dataframe: pd.DataFrame, categories: list[str]) -> list[pd.Dat
     )
 
     return list(seperated_df.values())
+
+
+def sum_up_csv(data):
+    order_overview = data.head(10)
+    order_overview = order_overview.drop(data.columns[6:], axis=1).drop(
+        range(5), axis=0
+    )
+
+    overview_categories = order_overview[order_overview.columns[0]][2:-1].tolist()
+
+    columns = [
+        "Item",
+        "Date",
+        "Time",
+        "Item number",
+        "Amount",
+        "Ex. vat",
+        "Vat",
+        "Incl. vat",
+        "Currency",
+        "Employe",
+    ]
+
+    column_mapping = dict(zip(data.columns[:10], columns))
+
+    data.rename(columns=column_mapping, inplace=True)
+
+    data = data.tail(-13)
+
+    clean_data = clean_file(data)
+
+    overviews = seperate_data(clean_data, overview_categories)
+
+    for i in overviews:
+        i.loc[:, "Date"] = pd.to_datetime(i["Date"], format="%d-%m-%Y")
+
+    sums = [values.groupby("Date")["Incl. vat"].sum() for values in overviews]
+    return sums
+
+
+if __name__ == "__main__":
+    pass
