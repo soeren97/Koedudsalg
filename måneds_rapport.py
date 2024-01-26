@@ -1,48 +1,27 @@
 import pandas as pd
 import numpy as np
 
-from src.clean_csv import clean_file, seperate_data
-from src.filehandling import save_dataframe, load_data
+from src.clean_csv import sum_up_csv
+from src.filehandling import load_dataframe, save_dataframe, load_config
 from src.plotting import plot_by_day, plot_by_week, plot_by_month
+from src.soap import DanDomainSOAPHandler
+
+USE_SOAP = True
 
 
 def main():
-    data = load_data()
+    if USE_SOAP:
+        dd_config = load_config("config")
+        loader = DanDomainSOAPHandler(dd_config)
+        sums = loader.make_soap_request(
+            start_date="2023-12-01",
+            end_date="2023-12-05",
+        )
 
-    order_overview = data.head(10)
-    order_overview = order_overview.drop(data.columns[6:], axis=1).drop(
-        range(5), axis=0
-    )
+    else:
+        data = load_dataframe("Data/Månedsrapport webshop december 2023.csv")
 
-    overview_categories = order_overview[order_overview.columns[0]][2:-1].tolist()
-
-    columns = [
-        "Item",
-        "Date",
-        "Time",
-        "Item number",
-        "Amount",
-        "Ex. vat",
-        "Vat",
-        "Incl. vat",
-        "Currency",
-        "Employe",
-    ]
-
-    column_mapping = dict(zip(data.columns[:10], columns))
-
-    data.rename(columns=column_mapping, inplace=True)
-
-    data = data.tail(-13)
-
-    clean_data = clean_file(data)
-
-    overviews = seperate_data(clean_data, overview_categories)
-
-    for i in overviews:
-        i.loc[:, "Date"] = pd.to_datetime(i["Date"], format="%d-%m-%Y").dt.date
-
-    sums = [values.groupby("Date")["Incl. vat"].sum() for values in overviews]
+        sums = sum_up_csv(data)
 
     report = pd.concat(sums, axis=1).fillna(0)
 
@@ -50,7 +29,9 @@ def main():
 
     report["Total"] = report.sum(axis=1)
 
-    path = f"{report.index[0]}-{report.index[-1]}"
+    # report.index = pd.DatetimeIndex(report.index)
+
+    path = f"{report.index[0].strftime('%Y-%m-%d')}_to_{report.index[-1].strftime('%Y-%m-%d')}"
 
     save_dataframe(report, path)
 

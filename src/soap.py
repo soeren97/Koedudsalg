@@ -1,59 +1,61 @@
-import requests
+from datetime import datetime
+
+from zeep import Client
+import pandas as pd
 
 
-class DanDomainHandler:
-    def __init__(self, url: str) -> None:
-        self.url = url
-        self.headers = None
-        self.query = None
-        self.variables = None
+class DanDomainSOAPHandler:
+    def __init__(self, config):
+        self.wsdl_url = "https://api.hostedshop.io/service.wsdl"
+        self.username = config["Username"]
+        self.password = config["Password"]
 
-    def set_token(self, token: str) -> None:
-        """Set the access token for the request.
+        self.client = Client(wsdl=self.wsdl_url)
+        self.client.service.Solution_Connect(
+            Username=self.username,
+            Password=self.password,
+        )
 
-        Args:
-            token (str): Access token.
-        """
-        self.headers = token
+        self.specify_format()
 
-    def set_query(self) -> None:
-        """Set the query for the request."""
-        self.query = """
-            query Orders($startDate: String!, $endDate: String!) {
-                orders(startDate: $startDate, endDate: $endDate) {
-                    data {
-                        id
-                        orderDate
-                    }
-                }
+    def specify_format(self):
+        self.client.service.Order_SetFields(
+            "Id, Status, Payment, Vat, Total, DateDelivered"
+        )
+
+    def reformat_soap_response(self, responce: list[dict]):
+        flat_data = [
+            {
+                "Date": datetime.strptime(entry["DateDelivered"][:10], "%Y-%m-%d"),
+                "Incl. vat": entry["Total"] * (1 + entry["Vat"]),
+                "PaymentMethod": entry["Payment"]["Title"],
             }
-        """
+            for entry in responce
+        ]
+        response_df = pd.DataFrame(flat_data)
 
-    def set_variables(self, start_date: str, end_date: str) -> None:
-        """Set the variables for the request.
+        credit_card_df = response_df[
+            response_df["PaymentMethod"] == "Kreditkortbetaling"
+        ]
+        card_terminal_df = response_df[response_df["PaymentMethod"] == "Kortterminal"]
+        cash_df = response_df[response_df["PaymentMethod"] == "Kontant betaling"]
 
-        Args:
-            start_date (str): Start date of request.
-            end_date (str): End date of request.
-        """
-        self.variables = {"startDate": start_date, "endDate": end_date}
+        return [card_terminal_df, credit_card_df, cash_df]
 
-    def make_graphql_request(self):
-        """
-        Make a GraphQL request.
+    # def sum_up_soap_responce(self, df_list: list[pd.DataFrame]):
 
-        Returns:
-            dict: The JSON response from the GraphQL server.
-        """
-        payload = {"query": self.query, "variables": self.variables}
-        response = requests.post(self.url, json=payload, headers=self.headers)
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(
-                f"GraphQL request failed with status code {response.status_code}: {response.text}"
+    def make_soap_request(self, start_date, end_date):
+        try:
+            result = self.client.service.Order_GetByDate(
+                Start=start_date,
+                End=end_date,
+                Status="8",
             )
+            result_dfs = self.reformat_soap_response(result)
+            sums = [values.groupby("Date")["Incl. vat"].sum() for values in result_dfs]
+            return sums
+        except Exception as e:
+            print(f"Error making SOAP request: {e}")
 
 
 if __name__ == "__main__":
