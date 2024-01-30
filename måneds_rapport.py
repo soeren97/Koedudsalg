@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
+import tkinter as tk
 
 from src.clean_csv import sum_up_csv
 from src.filehandling import load_dataframe, save_dataframe, load_config
 from src.plotting import plot_by_day, plot_by_week, plot_by_month
 from src.soap import DanDomainSOAPHandler
+from src.gui import DateRangeWindow
 
 USE_SOAP = True
 
@@ -14,8 +16,8 @@ def main():
         dd_config = load_config("config")
         loader = DanDomainSOAPHandler(dd_config)
         sums = loader.make_soap_request(
-            start_date="2023-12-01",
-            end_date="2023-12-05",
+            start_date=dd_config["Start_date"],
+            end_date=dd_config["End_date"],
         )
 
     else:
@@ -29,8 +31,6 @@ def main():
 
     report["Total"] = report.sum(axis=1)
 
-    # report.index = pd.DatetimeIndex(report.index)
-
     path = f"{report.index[0].strftime('%Y-%m-%d')}_to_{report.index[-1].strftime('%Y-%m-%d')}"
 
     save_dataframe(report, path)
@@ -43,4 +43,7 @@ def main():
 
 
 if __name__ == "__main__":
+    root = tk.Tk()
+    date_range_window = DateRangeWindow(root)
+    root.mainloop()
     main()
