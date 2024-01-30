@@ -25,7 +25,7 @@ def save_config(config_name: str, config: dict) -> None:
         config_name (str): Name of config file.
         config (dict): Config to be saved
     """
-    with open(f"Config/{config_name}.json") as file:
+    with open(f"Config/{config_name}.json", "w") as file:
         json.dump(config, file, indent=4)
 
 
