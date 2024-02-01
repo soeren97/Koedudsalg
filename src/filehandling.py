@@ -51,7 +51,7 @@ def save_dataframe(dataframe: pd.DataFrame, path: str) -> None:
         path (str): Path to folder where dataframe will be saved.
     """
     os.makedirs(f"Reports/{path}", exist_ok=True)
-    dataframe.to_csv(f"Reports/{path}/spreadsheet.csv")
+    dataframe.to_excel(f"Reports/{path}/spreadsheet.xlsx")
 
 
 if __name__ == "__main__":
