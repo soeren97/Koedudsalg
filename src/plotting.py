@@ -89,6 +89,8 @@ def plot_by_day(dataframe: pd.DataFrame, path: str) -> None:
         dataframe (pd.DataFrame): Daily sales.
         path (str): Path to folder where image will be saved
     """
+    if len(dataframe.index) < 3:
+        return
 
     plt.figure(figsize=(10, 6))
 
