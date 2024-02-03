@@ -2,6 +2,7 @@ import os
 import json
 
 import pandas as pd
+from datetime import datetime, timedelta
 
 
 def load_config(config_name: str) -> dict:
@@ -52,6 +53,26 @@ def save_dataframe(dataframe: pd.DataFrame, path: str) -> None:
     """
     os.makedirs(f"Reports/{path}", exist_ok=True)
     dataframe.to_excel(f"Reports/{path}/spreadsheet.xlsx")
+
+
+def change_date_today():
+    # Get the current date and time
+    current_datetime = datetime.now()
+
+    # Calculate the date for yesterday
+    yesterday = current_datetime - timedelta(days=1)
+
+    # Get the earliest timestamp for yesterday (midnight)
+    start_date = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
+
+    # # Get the latest timestamp for yesterday (23:59:59)
+    end_date = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
+
+    config = load_config("config")
+    config["Start_date"] = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    config["End_date"] = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    save_config("config", config)
 
 
 if __name__ == "__main__":

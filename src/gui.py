@@ -1,7 +1,6 @@
 import tkinter as tk
-from datetime import datetime, timedelta
 
-from src.filehandling import load_config, save_config
+from src.filehandling import load_config, save_config, change_date_today
 
 
 class DateRangeWindow:
@@ -54,24 +53,8 @@ class DateRangeWindow:
         self.master.destroy()
 
     def daily_report(self) -> None:
-        """Get user input from the entry widgets."""
-        # Get the current date and time
-        current_datetime = datetime.now()
-
-        # Calculate the date for yesterday
-        yesterday = current_datetime - timedelta(days=1)
-
-        # Get the earliest timestamp for yesterday (midnight)
-        start_date = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
-
-        # # Get the latest timestamp for yesterday (23:59:59)
-        end_date = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
-
-        config = load_config("config")
-        config["Start_date"] = start_date.strftime("%Y-%m-%d %H:%M:%S")
-        config["End_date"] = end_date.strftime("%Y-%m-%d %H:%M:%S")
-
-        save_config("config", config)
+        """Get daily report."""
+        change_date_today()
 
         self.master.destroy()
 
