@@ -4,7 +4,7 @@ import tkinter as tk
 
 from src.clean_csv import sum_up_csv
 from src.filehandling import load_dataframe, save_dataframe, load_config
-from src.plotting import plot_by_day, plot_by_week, plot_by_month
+from src.plotting import plot_by_day, plot_by_week, plot_by_month, plot_bar_chart
 from src.soap import DanDomainSOAPHandler
 from src.gui import DateRangeWindow
 
@@ -40,6 +40,8 @@ def main():
     plot_by_week(report, path)
 
     plot_by_month(report, path)
+
+    plot_bar_chart(report, path)
 
 
 if __name__ == "__main__":
