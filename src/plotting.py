@@ -173,8 +173,8 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
         dataframe (pd.DataFrame): Data to be ploted.
         path (str): Path to folder where image will be saved
     """
-    # if len(dataframe.index) < 3:
-    #     return
+    if len(dataframe.index) < 3:
+        return
 
     plt.figure(figsize=(10, 6))
 
