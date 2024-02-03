@@ -5,10 +5,9 @@ from src.plotting import get_all_plots
 from src.data_handler import get_and_clean_data
 from src.gui import DateRangeWindow
 
-USE_SOAP = True
-
 
 def main():
+    """Create a report based on user input."""
     dd_config = load_config("config")
 
     report = get_and_clean_data(dd_config)
