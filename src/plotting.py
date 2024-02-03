@@ -210,7 +210,7 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
 
     plot_weekend(dataframe)
 
-    save_image(f"{path}/søjlediagram", dataframe)
+    save_image(f"{path}/bar_chart", dataframe)
 
 
 if __name__ == "__main__":
