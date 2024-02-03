@@ -213,5 +213,21 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
     save_image(f"{path}/bar_chart", dataframe)
 
 
+def get_all_plots(report: pd.Dataframe, path: str) -> None:
+    """Plot all relevant plots.
+
+    Args:
+        report (pd.Dataframe): Data plots should be made from.
+        path (str): Folder where data should be saved.
+    """
+    plot_by_day(report, path)
+
+    plot_by_week(report, path)
+
+    plot_by_month(report, path)
+
+    plot_bar_chart(report, path)
+
+
 if __name__ == "__main__":
     pass
