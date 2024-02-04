@@ -44,11 +44,11 @@ def load_dataframe(path: str) -> pd.DataFrame:
     )
 
 
-def save_dataframe(dataframe: pd.DataFrame, path: str) -> None:
+def save_dataframe(dataframe: list[pd.DataFrame], path: str) -> None:
     """Save dataframe.
 
     Args:
-        dataframe (pd.DataFrame): Dataframe to be saved.
+        dataframe (list[pd.DataFrame]): Dataframe to be saved.
         path (str): Path to folder where dataframe will be saved.
     """
     os.makedirs(f"Reports/{path}", exist_ok=True)

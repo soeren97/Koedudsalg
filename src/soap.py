@@ -23,10 +23,10 @@ class DanDomainSOAPHandler:
             "Id, Status, Payment, Vat, Total, DateDelivered"
         )
 
-    def reformat_soap_response(self, responce: list[dict]):
+    def reformat_soap_response(self, responce: list[dict]) -> list[pd.DataFrame]:
         flat_data = [
             {
-                "Date": datetime.strptime(entry["DateDelivered"][:10], "%Y-%m-%d"),
+                "Date": datetime.strptime(entry["DateDelivered"], "%Y-%m-%d %H:%M:%S"),
                 "Incl. vat": entry["Total"] * (1 + entry["Vat"]),
                 "PaymentMethod": entry["Payment"]["Title"],
             }
@@ -42,9 +42,16 @@ class DanDomainSOAPHandler:
 
         return [card_terminal_df, credit_card_df, cash_df]
 
-    # def sum_up_soap_responce(self, df_list: list[pd.DataFrame]):
+    def make_soap_request(self, start_date: str, end_date: str) -> list[pd.DataFrame]:
+        """Preform SOAP request.
 
-    def make_soap_request(self, start_date, end_date):
+        Args:
+            start_date (str): Date of earliest orders.
+            end_date (str): Date of latest orders.
+
+        Returns:
+            pd.DataFrame: Orders.
+        """
         try:
             result = self.client.service.Order_GetByDate(
                 Start=start_date,
@@ -52,8 +59,7 @@ class DanDomainSOAPHandler:
                 Status="8",
             )
             result_dfs = self.reformat_soap_response(result)
-            sums = [values.groupby("Date")["Incl. vat"].sum() for values in result_dfs]
-            return sums
+            return result_dfs
         except Exception as e:
             print(f"Error making SOAP request: {e}")
 
