@@ -213,7 +213,7 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
     save_image(f"{path}/bar_chart", dataframe)
 
 
-def get_all_plots(report: pd.Dataframe, path: str) -> None:
+def get_all_plots(report: pd.DataFrame, path: str) -> None:
     """Plot all relevant plots.
 
     Args:
