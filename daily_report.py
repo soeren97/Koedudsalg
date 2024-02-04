@@ -11,7 +11,7 @@ def main():
 
     report = get_and_clean_data(dd_config)
 
-    path = f"{report.index[0].strftime('%Y-%m-%d')}_to_{report.index[-1].strftime('%Y-%m-%d')}"
+    path = f"Daily_report_{report.index[0].strftime('%Y-%m-%d')}"
 
     save_dataframe(report, path)
 
