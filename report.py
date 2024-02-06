@@ -12,9 +12,7 @@ def main():
 
     report = get_and_clean_data(dd_config, sort_by_order=False)
 
-    path = f"{report.index[0]}_to_{report.index[-1]}"
-
-    # path = f"{report.index[0].strftime('%Y-%m-%d')}_to_{report.index[-1].strftime('%Y-%m-%d')}"
+    path = f"{report.index[0].strftime('%Y-%m-%d')}_to_{report.index[-1].strftime('%Y-%m-%d')}"
 
     save_dataframe(report, path)
 
