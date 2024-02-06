@@ -80,9 +80,8 @@ def sum_up_data(
         pass
     else:
         for df in dataframe:
-            df["Date"] = pd.to_datetime(
-                df["Date"], format="%Y-%m-%d %H:%M:%S"
-            ).dt.strftime("%Y-%m-%d")
+            df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
+
     sums = [values.groupby("Date")["Incl. vat"].sum() for values in dataframe]
 
     return sums
