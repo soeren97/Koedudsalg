@@ -75,5 +75,25 @@ def change_date_today():
     save_config("config", config)
 
 
+def change_date_year():
+    # Get the current date and time
+    current_datetime = datetime.now()
+
+    # Get last year
+    last_year = current_datetime - timedelta(days=365)
+
+    # Get the earliest timestamp for last year
+    start_date = datetime(last_year.year, 1, 1, 0, 0, 0)
+
+    # # Get the latest timestamp for this year
+    end_date = datetime(current_datetime.year, 12, 31, 23, 59, 59)
+
+    config = load_config("config")
+    config["Start_date"] = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    config["End_date"] = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    save_config("config", config)
+
+
 if __name__ == "__main__":
     pass

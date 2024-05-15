@@ -16,12 +16,8 @@ def save_image(path: str, dataframe: pd.DataFrame) -> None:
     """
     plt.ylabel("Sales Incl. vat [DKK]")
     plt.tight_layout()
-    plt.xlim(
-        dataframe.index.min() - timedelta(hours=12),
-        dataframe.index.max() + timedelta(hours=12),
-    )
     plt.ylim(bottom=0)
-    plt.legend()
+    plt.legend(loc="upper right")
     plt.savefig(f"Reports/{path}.png")
     plt.close()
 
@@ -37,10 +33,10 @@ def plot_weekend(dataframe: pd.DataFrame) -> None:
 
     for saturday in saturdays:
         plt.axvspan(
-            saturday,
-            saturday + np.timedelta64(2, "D"),
+            saturday - np.timedelta64(12, "h"),
+            saturday + np.timedelta64(36, "h"),
             color="gray",
-            alpha=0.3,
+            alpha=0.4,
         )
 
 
@@ -72,6 +68,35 @@ def plot_by_payment(dataframe: pd.DataFrame) -> None:
         color=PLOTTING_COLORS[2],
         alpha=0.7,
     )
+
+    cash_nonzero = np.nonzero(cash)
+    terminal_nonzero = np.nonzero(dataframe["Card terminal"])
+    card_nonzero = np.nonzero(dataframe["Credit card payment"])
+
+    for idx in cash_nonzero[0]:
+        plt.text(
+            dataframe.index[idx],
+            cash.iloc[idx],
+            f"{cash.iloc[idx]:.2f}",
+            ha="center",
+            va="bottom",
+        )
+    for idx in terminal_nonzero[0]:
+        plt.text(
+            dataframe.index[idx],
+            terminal.iloc[idx],
+            f"{terminal.iloc[idx]:.2f}",
+            ha="center",
+            va="top",
+        )
+    for idx in card_nonzero[0]:
+        plt.text(
+            dataframe.index[idx],
+            card.iloc[idx],
+            f"{card.iloc[idx]:.2f}",
+            ha="center",
+            va="bottom",
+        )
 
     plt.fill_between(
         card.index,
@@ -115,12 +140,8 @@ def plot_by_day(dataframe: pd.DataFrame, path: str) -> None:
 
     plot_by_payment(dataframe)
 
-    plt.xticks(
-        ticks=dataframe.index,
-        labels=dataframe.index.strftime("%Y/%m/%d"),
-        rotation=30,
-        ha="right",
-    )
+    plt.xticks(dataframe.index, [date.strftime("%m-%d") for date in dataframe.index])
+
     save_image(f"{path}/daily", dataframe)
 
 
@@ -166,6 +187,29 @@ def plot_by_month(dataframe: pd.DataFrame, path: str) -> None:
     save_image(f"{path}/monthly", monthly_data)
 
 
+def plot_yearly_comparisson(dataframe: pd.DataFrame, path: str) -> None:
+    """Plot last years sales compared to this years.
+
+    Args:
+        dataframe (pd.DataFrame): Data to be plotted.
+        path (str): Path where plot will be saved.
+    """
+    plt.figure(figsize=(10, 6))
+    monthly_data = dataframe.copy()
+    monthly_data.index = monthly_data.index.strftime("%Y-%m")
+    monthly_data = monthly_data.groupby("Date").sum()
+
+    if len(monthly_data.index) < 13:
+        return
+
+    dataframe_list = monthly_data.groupby(pd.Grouper(freq="Y"))
+
+    for _, df in dataframe_list:
+        plt.plot(df["Total"])
+
+    save_image(path, dataframe)
+
+
 def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
     """Plot a histogram of daily sales.
 
@@ -183,7 +227,7 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
     # Create a bar chart for each column
     for i, col in enumerate(dataframe.columns):
         plt.bar(
-            dataframe.index + i * bar_spacing - bar_spacing * 2,
+            dataframe.index + (i - 2) * bar_spacing,
             dataframe[col],
             width=0.1,
             label=col,
@@ -194,21 +238,16 @@ def plot_bar_chart(dataframe: pd.DataFrame, path: str) -> None:
             if value == 0:
                 continue
             plt.text(
-                dataframe.index[j] + i * bar_spacing,
+                dataframe.index[j] + (i - 2) * bar_spacing,
                 value + 1,  # Adjust the vertical position of the text as needed
                 str(value),
                 ha="center",
                 rotation=30,
             )
 
-    plt.xticks(
-        ticks=dataframe.index,
-        labels=dataframe.index.strftime("%Y/%m/%d"),
-        rotation=30,
-        ha="right",
-    )
-
     plot_weekend(dataframe)
+
+    plt.xticks(dataframe.index, [date.strftime("%m-%d") for date in dataframe.index])
 
     save_image(f"{path}/bar_chart", dataframe)
 
@@ -220,13 +259,15 @@ def get_all_plots(report: pd.DataFrame, path: str) -> None:
         report (pd.Dataframe): Data plots should be made from.
         path (str): Folder where data should be saved.
     """
-    plot_by_day(report, path)
-
     plot_by_week(report, path)
 
     plot_by_month(report, path)
 
-    plot_bar_chart(report, path)
+    daily_report = report.groupby(pd.Grouper(freq="D")).sum()
+
+    plot_by_day(daily_report, path)
+
+    plot_bar_chart(daily_report, path)
 
 
 if __name__ == "__main__":
