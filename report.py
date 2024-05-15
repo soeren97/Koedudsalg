@@ -20,7 +20,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # root = tk.Tk()
-    # date_range_window = DateRangeWindow(root)
-    # root.mainloop()
+    root = tk.Tk()
+    date_range_window = DateRangeWindow(root)
+    root.mainloop()
     main()
