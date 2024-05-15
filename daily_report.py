@@ -5,9 +5,9 @@ from src.data_handler import get_and_clean_data
 
 def main():
     """Create a daily report."""
-    dd_config = load_config("config")
-
     change_date_today()
+
+    dd_config = load_config("config")
 
     report = get_and_clean_data(dd_config)
 
